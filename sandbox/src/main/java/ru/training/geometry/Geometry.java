@@ -11,7 +11,7 @@ public class Geometry {
         Square.printSquareArea(new Square(9.0));
 
         Rectangle.printRectangleArea(new Rectangle(4.0, 5.0));
-        Rectangle.printRectangleArea(new Rectangle(12,55));
+        Rectangle.printRectangleArea(new Rectangle(12, 55));
 
         Triangle.printTriangleArea(new Triangle(2.0, 3.0, 4.0));
         Triangle.printTriangleArea(new Triangle(2.0, 2.0, 1.0));
