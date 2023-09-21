@@ -7,7 +7,7 @@ public record Triangle(double a, double b, double c) {
     }
 
     public double area() {
-        var p = (this.a + this.b + this.c) / 2; // вычисление полупериметра
+        var p = this.perimeter() / 2; // вычисление полупериметра
         return Math.sqrt(p * (p - this.a) * (p - this.b) * (p - this.c));
     }
 
