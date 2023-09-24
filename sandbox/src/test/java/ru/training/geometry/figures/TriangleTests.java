@@ -21,4 +21,24 @@ public class TriangleTests {
         Assertions.assertEquals(5.0, new Triangle(2.0, 2.0, 1.0).perimeter());
         Assertions.assertEquals(17.17, new Triangle(7.8, 4.25, 5.12).perimeter());
     }
+
+    @Test
+    void cannotCreateTriangleWithNegativeSide() {
+        try {
+            new Triangle(-5.0, 3.0, 7.0);
+            Assertions.fail();
+        } catch (IllegalArgumentException exception) {
+            // ok
+        }
+    }
+
+    @Test
+    void cannotCreateTriangleWithBrokenInequality() {
+        try {
+            new Triangle(2.0, 1.0, 7.0);
+            Assertions.fail();
+        } catch (IllegalArgumentException exception) {
+            // ok
+        }
+    }
 }
