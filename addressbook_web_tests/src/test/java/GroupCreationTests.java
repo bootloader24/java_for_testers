@@ -6,7 +6,7 @@ public class GroupCreationTests extends TestBase {
     @Test
     public void canCreateGroup() {
         openGroupsPage();
-        createGroup(new GroupData("name", "name header", "name footer"));
+        createGroup(new GroupData("group name", "group header", "group footer"));
     }
 
     @Test

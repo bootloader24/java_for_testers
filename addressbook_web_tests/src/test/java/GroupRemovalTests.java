@@ -7,7 +7,7 @@ public class GroupRemovalTests extends TestBase {
     public void canRemoveGroup() {
         openGroupsPage();
         if (!isGroupPresent()) {
-            createGroup(new GroupData("name", "name header", "name footer"));
+            createGroup(new GroupData("group name", "group header", "group footer"));
         }
         removeGroup();
     }
