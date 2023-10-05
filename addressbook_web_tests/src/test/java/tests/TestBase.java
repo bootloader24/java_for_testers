@@ -10,7 +10,7 @@ public class TestBase {
     public void setUp() {
         if (app == null) {
             app = new ApplicationManager();
-            app.init();
+            app.init(System.getProperty("browser", "firefox"));
         }
     }
 
