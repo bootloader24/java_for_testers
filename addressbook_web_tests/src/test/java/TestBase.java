@@ -6,6 +6,7 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import java.time.Duration;
 
 public class TestBase {
     protected static WebDriver driver;
@@ -14,6 +15,7 @@ public class TestBase {
     public void setUp() {
         if (driver == null) {
             driver = new FirefoxDriver();
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(100));
             Runtime.getRuntime().addShutdownHook(new Thread(driver::quit));
             driver.get("http://localhost/addressbook");
             driver.manage().window().setSize(new Dimension(926, 691));
