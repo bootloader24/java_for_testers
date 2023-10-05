@@ -1,0 +1,14 @@
+import model.ContactData;
+import org.junit.jupiter.api.Test;
+
+public class ContactRemovalTests extends TestBase {
+    @Test
+    public void canRemoveContact() {
+        openHomePage();
+        if (!isItemPresent()) {
+            createContact(new ContactData("Ivanov", "Andrey", "Lenina, 15", "andrey121@gmail.com", "+7-123-456-7890"));
+        }
+        removeContact();
+    }
+
+}
