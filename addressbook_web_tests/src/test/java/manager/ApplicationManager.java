@@ -28,7 +28,7 @@ public class ApplicationManager {
             } else {
                 throw new IllegalArgumentException(String.format("Unknown browser: %a", browser));
             }
-            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(100));
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500));
             Runtime.getRuntime().addShutdownHook(new Thread(driver::quit));
             driver.get("http://localhost/addressbook");
             driver.manage().window().setSize(new Dimension(926, 691));
