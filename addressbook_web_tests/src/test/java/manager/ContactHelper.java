@@ -88,4 +88,27 @@ public class ContactHelper extends HelperBase {
         }
         return contacts;
     }
+
+    public void modifyContact(ContactData contact, ContactData modifiedContact) {
+        openHomePage();
+        initContactModification(contact);
+        fillContactForm(modifiedContact);
+        submitContactModification();
+        openHomePage();
+    }
+
+    private void submitContactModification() {
+        click(By.name("update"));
+    }
+
+    private void initContactModification(ContactData contact) {
+        var tableRows = manager.driver.findElements(By.name("entry"));
+        //var id = contact.
+        for (var tableRow : tableRows) {
+            if (tableRow.findElement(By.cssSelector("td:nth-child(1).center>input")).getAttribute("value").equals(contact.id())) {
+                tableRow.findElement(By.cssSelector("img[title='Edit']")).click();
+                break;
+            }
+        }
+    }
 }
