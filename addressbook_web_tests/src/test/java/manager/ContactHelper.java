@@ -102,13 +102,6 @@ public class ContactHelper extends HelperBase {
     }
 
     private void initContactModification(ContactData contact) {
-        var tableRows = manager.driver.findElements(By.name("entry"));
-        //var id = contact.
-        for (var tableRow : tableRows) {
-            if (tableRow.findElement(By.cssSelector("td:nth-child(1).center>input")).getAttribute("value").equals(contact.id())) {
-                tableRow.findElement(By.cssSelector("img[title='Edit']")).click();
-                break;
-            }
-        }
+        manager.driver.findElement(By.xpath("//a[@href='edit.php?id=" + contact.id() + "']")).click();
     }
 }
