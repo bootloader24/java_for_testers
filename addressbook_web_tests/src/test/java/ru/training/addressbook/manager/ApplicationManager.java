@@ -1,4 +1,4 @@
-package manager;
+package ru.training.addressbook.manager;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;

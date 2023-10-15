@@ -1,6 +1,6 @@
-package manager;
+package ru.training.addressbook.manager;
 
-import model.ContactData;
+import ru.training.addressbook.model.ContactData;
 import org.openqa.selenium.By;
 
 import java.util.ArrayList;

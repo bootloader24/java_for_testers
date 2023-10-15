@@ -1,6 +1,6 @@
-package tests;
+package ru.training.addressbook.tests;
 
-import manager.ApplicationManager;
+import ru.training.addressbook.manager.ApplicationManager;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;

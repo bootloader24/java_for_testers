@@ -1,4 +1,4 @@
-package model;
+package ru.training.addressbook.model;
 
 public record GroupData(String id, String name, String header, String footer) {
 

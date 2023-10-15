@@ -1,6 +1,6 @@
-package tests;
+package ru.training.addressbook.tests;
 
-import model.GroupData;
+import ru.training.addressbook.model.GroupData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
