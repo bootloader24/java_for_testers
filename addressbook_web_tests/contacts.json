@@ -1,0 +1,33 @@
+[ {
+  "id" : "",
+  "lastName" : "",
+  "firstName" : "",
+  "address" : "",
+  "email" : "",
+  "phoneHome" : "",
+  "photo" : "src/test/resources/images/cats-png-256992.png"
+}, {
+  "id" : "",
+  "lastName" : "kajwwpufyv",
+  "firstName" : "tbungyoukc",
+  "address" : "kukofrbmzg",
+  "email" : "dipzxkdeto",
+  "phoneHome" : "devhjmzeja",
+  "photo" : "src/test/resources/images/cat-head-png-95679.png"
+}, {
+  "id" : "",
+  "lastName" : "hzmwzhsidcsqujlcteem",
+  "firstName" : "lasghnfnzhgbzrolxoeu",
+  "address" : "uqisdbmpgedfbjeuxars",
+  "email" : "ggkdtevalcduuusyhwry",
+  "phoneHome" : "jchgbmhcbtbhsauwapmi",
+  "photo" : "src/test/resources/images/avatar.png"
+}, {
+  "id" : "",
+  "lastName" : "kbbshogyckjvuxarwvachquszrypyk",
+  "firstName" : "dvkuporinhvcddapegibxwjwlvxzhz",
+  "address" : "qhluxpzvivgoeaohwmehjreeeosflu",
+  "email" : "gldijbxrxboqegbswfgykxkfqtrpns",
+  "phoneHome" : "klmhrbfdqeipgpyvgygmmlatoihuix",
+  "photo" : "src/test/resources/images/cat-png-transparent-619583.png"
+} ]

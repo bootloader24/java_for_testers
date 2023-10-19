@@ -1,45 +1,46 @@
 package ru.training.addressbook.tests;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.training.addressbook.common.CommonFunctions;
 import ru.training.addressbook.model.ContactData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class ContactCreationTests extends TestBase {
 
-    public static List<ContactData> contactProvider() {
+    public static List<ContactData> contactProvider() throws IOException {
         var result = new ArrayList<ContactData>();
-        for (var lastName : List.of("", "somelastname")) {
-            for (var firstName : List.of("", "somefirstname")) {
-                for (var address : List.of("", "someaddress")) {
-                    for (var email : List.of("", "some@email")) {
-                        for (var phoneHome : List.of("", "123-456-789")) {
-                            result.add(new ContactData()
-                                    .withLastname(lastName)
-                                    .withFirstname(firstName)
-                                    .withAddress(address)
-                                    .withEmail(email)
-                                    .withPhoneHome(phoneHome)
-                                    .withPhoto(""));
-                        }
-                    }
-                }
-            }
-        }
-        for (int i = 0; i < 4; i++) {
-            result.add(new ContactData()
-                    .withLastname(randomString(i * 10))
-                    .withFirstname(randomString(i * 10))
-                    .withAddress(randomString(i * 10))
-                    .withEmail(randomString(i * 10))
-                    .withPhoneHome(randomString(i * 10))
-                    .withPhoto(""));
-        }
+//        for (var lastName : List.of("", "somelastname")) {
+//            for (var firstName : List.of("", "somefirstname")) {
+//                for (var address : List.of("", "someaddress")) {
+//                    for (var email : List.of("", "some@email")) {
+//                        for (var phoneHome : List.of("", "123-456-789")) {
+//                            result.add(new ContactData()
+//                                    .withLastname(lastName)
+//                                    .withFirstname(firstName)
+//                                    .withAddress(address)
+//                                    .withEmail(email)
+//                                    .withPhoneHome(phoneHome)
+//                                    .withPhoto(""));
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        var json = Files.readString(Paths.get("contacts.json"));
+        ObjectMapper mapper = new ObjectMapper();
+        var value = mapper.readValue(json, new TypeReference<List<ContactData>>() {});
+        result.addAll(value);
         return result;
     }
 
@@ -51,11 +52,11 @@ public class ContactCreationTests extends TestBase {
 
     @Test
     void canCreateContact() {
-        var contact = new ContactData().withLastnameAndFirstname(randomString(10), randomString(10))
-                .withAddress(randomString(10))
-                .withEmail(randomString(10))
-                .withPhoneHome(randomString(10))
-                .withPhoto(randomFile("src/test/resources/images"));
+        var contact = new ContactData().withLastnameAndFirstname(CommonFunctions.randomString(10), CommonFunctions.randomString(10))
+                .withAddress(CommonFunctions.randomString(10))
+                .withEmail(CommonFunctions.randomString(10))
+                .withPhoneHome(CommonFunctions.randomString(10))
+                .withPhoto(CommonFunctions.randomFile("src/test/resources/images"));
         app.contacts().createContact(contact);
     }
 
