@@ -55,7 +55,7 @@ public class Generator {
 
     private Object generateGroups() {
         var result = new ArrayList<GroupData>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < count; i++) {
             result.add(new GroupData()
                     .withName(CommonFunctions.randomString(i * 10))
                     .withHeader(CommonFunctions.randomString(i * 10))
@@ -66,7 +66,7 @@ public class Generator {
 
     private Object generateContacts() {
         var result = new ArrayList<ContactData>();
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < count; i++) {
             result.add(new ContactData()
                     .withLastname(CommonFunctions.randomString(i * 10))
                     .withFirstname(CommonFunctions.randomString(i * 10))
