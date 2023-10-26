@@ -12,15 +12,15 @@ public class GroupModificationTests extends TestBase {
 
     @Test
     void canModifyGroup() {
-        if (app.groups().getCount() == 0) {
-            app.groups().createGroup(new GroupData("", "group name", "group header", "group footer"));
+        if (app.hbm().getGroupCount() == 0) {
+            app.hbm().createGroup(new GroupData("", "group name", "group header", "group footer"));
         }
-        var oldGroups = app.groups().getList();
+        var oldGroups = app.hbm().getGroupList();
         var rnd = new Random();
         var index = rnd.nextInt(oldGroups.size());
         var testData = new GroupData().withName("modified name");
         app.groups().modifyGroup(oldGroups.get(index), testData);
-        var newGroups = app.groups().getList();
+        var newGroups = app.hbm().getGroupList();
         var expectedList = new ArrayList<>(oldGroups);
         expectedList.set(index, testData.withId(oldGroups.get(index).id()));
         Comparator<GroupData> compareById = (o1, o2) -> {
@@ -28,7 +28,14 @@ public class GroupModificationTests extends TestBase {
         };
         newGroups.sort(compareById);
         expectedList.sort(compareById);
-        Assertions.assertEquals(newGroups, expectedList);
+        Assertions.assertEquals(expectedList, newGroups);
+
+        var newUiGroups = app.groups().getList();
+        newUiGroups.sort(compareById);
+        // на основе expectedList создаём новый ожидаемый список групп с пустыми значениями полей, которые не читаются из UI
+        var expectedUiList = new ArrayList<>(expectedList);
+        expectedUiList.replaceAll(groups -> groups.withHeader("").withFooter(""));
+        Assertions.assertEquals(expectedUiList, newUiGroups);
     }
 
 }

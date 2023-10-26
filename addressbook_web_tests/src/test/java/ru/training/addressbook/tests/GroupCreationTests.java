@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import ru.training.addressbook.common.CommonFunctions;
 import ru.training.addressbook.model.GroupData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -66,6 +67,13 @@ public class GroupCreationTests extends TestBase {
         return result;
     }
 
+    public static List<GroupData> singleRandomGroupProvider() throws IOException {
+        return List.of(new GroupData()
+                .withName(CommonFunctions.randomString(10))
+                .withHeader(CommonFunctions.randomString(20))
+                .withFooter(CommonFunctions.randomString(30)));
+    }
+
     public static List<GroupData> negativeGroupProvider() {
         var result = new ArrayList<GroupData>(List.of(
                 new GroupData("", "group' name", "", "")));
@@ -85,7 +93,31 @@ public class GroupCreationTests extends TestBase {
         var expectedList = new ArrayList<>(oldGroups);
         expectedList.add(group.withId(newGroups.get(newGroups.size() - 1).id()).withHeader("").withFooter(""));
         expectedList.sort(compareById);
-        Assertions.assertEquals(newGroups, expectedList);
+        Assertions.assertEquals(expectedList, newGroups);
+    }
+
+    @ParameterizedTest
+    @MethodSource("singleRandomGroupProvider")
+    public void canCreateGroup(GroupData group) {
+        var oldGroups = app.hbm().getGroupList();
+        app.groups().createGroup(group);
+        var newGroups = app.hbm().getGroupList();
+        Comparator<GroupData> compareById = (o1, o2) -> {
+            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
+        };
+        newGroups.sort(compareById);
+        var maxId = newGroups.get(newGroups.size() - 1).id();
+        var expectedList = new ArrayList<>(oldGroups);
+        expectedList.add(group.withId(maxId));
+        expectedList.sort(compareById);
+        Assertions.assertEquals(expectedList, newGroups);
+
+        var newUiGroups = app.groups().getList();
+        newUiGroups.sort(compareById);
+        // на основе expectedList создаём новый ожидаемый список групп с пустыми значениями полей, которые не читаются из UI
+        var expectedUiList = new ArrayList<>(expectedList);
+        expectedUiList.replaceAll(groups -> groups.withHeader("").withFooter(""));
+        Assertions.assertEquals(expectedUiList, newUiGroups);
     }
 
     @ParameterizedTest

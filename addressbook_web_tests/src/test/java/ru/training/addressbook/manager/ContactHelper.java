@@ -51,6 +51,10 @@ public class ContactHelper extends HelperBase {
         }
     }
 
+    public void refreshPage() {
+        manager.driver.navigate().refresh();
+    }
+
     private void submitContactCreation() {
         manager.driver.findElement(By.name("submit")).click();
     }
@@ -62,6 +66,8 @@ public class ContactHelper extends HelperBase {
     private void removeSelectedContact() {
         manager.driver.findElement(By.xpath("//input[@value=\'Delete\']")).click();
         manager.driver.switchTo().alert().accept();
+        // нужно подождать подтверждения удаления:
+        manager.driver.findElement(By.cssSelector("div.msgbox"));
     }
 
     public void removeAllContacts() {
@@ -85,7 +91,11 @@ public class ContactHelper extends HelperBase {
             var id = tableRow.findElement(By.cssSelector("td:nth-child(1).center>input")).getAttribute("value");
             var lastName = tableRow.findElement(By.cssSelector("td:nth-child(2)")).getText();
             var firstName = tableRow.findElement(By.cssSelector("td:nth-child(3)")).getText();
-            contacts.add(new ContactData().withId(id).withLastnameAndFirstname(lastName, firstName));
+            var address = tableRow.findElement(By.cssSelector("td:nth-child(4)")).getText();
+            var email = tableRow.findElement(By.cssSelector("td:nth-child(5)")).getText();
+            // поле phone не читаем, так как отображение отличается от хранимого значения, нужны дополнительные преобразования ожидания
+            // поле photo не читаем, так как оно не отображается в списке контактов
+            contacts.add(new ContactData().withId(id).withLastnameAndFirstname(lastName, firstName).withAddress(address).withEmail(email));
         }
         return contacts;
     }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import ru.training.addressbook.model.GroupData;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,20 +45,45 @@ public class ContactCreationTests extends TestBase {
         return result;
     }
 
+    public static List<ContactData> singleRandomContactProvider() throws IOException {
+        return List.of(new ContactData().withLastnameAndFirstname(CommonFunctions.randomString(10), CommonFunctions.randomString(10))
+                .withAddress(CommonFunctions.randomString(10))
+                .withEmail(CommonFunctions.randomString(10))
+                .withPhoneHome(CommonFunctions.randomString(10))
+                .withPhoto(CommonFunctions.randomFile("src/test/resources/images")));
+
+    }
+
     public static List<ContactData> negativeContactProvider() {
         var result = new ArrayList<ContactData>(List.of(new ContactData("", "first' name",
                 "", "", "", "", "")));
         return result;
     }
 
-    @Test
-    void canCreateContact() {
-        var contact = new ContactData().withLastnameAndFirstname(CommonFunctions.randomString(10), CommonFunctions.randomString(10))
-                .withAddress(CommonFunctions.randomString(10))
-                .withEmail(CommonFunctions.randomString(10))
-                .withPhoneHome(CommonFunctions.randomString(10))
-                .withPhoto(CommonFunctions.randomFile("src/test/resources/images"));
+    @ParameterizedTest
+    @MethodSource("singleRandomContactProvider")
+    void canCreateContact(ContactData contact) {
+        var oldContacts = app.hbm().getContactList();
         app.contacts().createContact(contact);
+        var newContacts = app.hbm().getContactList();
+        Comparator<ContactData> compareById = (o1, o2) -> {
+            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
+        };
+        newContacts.sort(compareById);
+        var maxId = newContacts.get(newContacts.size() - 1).id();
+        var expectedList = new ArrayList<>(oldContacts);
+        expectedList.add(contact.withId(maxId).withPhoto(""));
+        expectedList.sort(compareById);
+        Assertions.assertEquals(expectedList, newContacts);
+
+        var newUiContacts = app.contacts().getList();
+        newUiContacts.sort(compareById);
+        // на основе expectedList создаём новый ожидаемый список контактов с пустыми значениями полей, которые не читаются из UI
+        var expectedUiList = new ArrayList<>(expectedList);
+        // phone не будем читать, так как в UI не отображаются символы пробела, дефиса и круглых скобок
+        // здесь потребуется дополнительная обработка этого поля в ожидаемом значении
+        expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
+        Assertions.assertEquals(expectedUiList, newUiContacts);
     }
 
     @ParameterizedTest
@@ -71,14 +97,12 @@ public class ContactCreationTests extends TestBase {
         };
         newContacts.sort(compareById);
         var expectedList = new ArrayList<>(oldContacts);
-        expectedList.add(contact.withId(newContacts.get(newContacts.size() - 1)
-                .id())
-                .withAddress("")
-                .withEmail("")
+        expectedList.add(contact
+                .withId(newContacts.get(newContacts.size() - 1).id())
                 .withPhoneHome("")
                 .withPhoto(""));
         expectedList.sort(compareById);
-        Assertions.assertEquals(newContacts, expectedList);
+        Assertions.assertEquals(expectedList, newContacts);
     }
 
     @ParameterizedTest

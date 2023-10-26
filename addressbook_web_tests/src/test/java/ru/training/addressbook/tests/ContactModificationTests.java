@@ -12,21 +12,22 @@ public class ContactModificationTests extends TestBase {
 
     @Test
     void canModifyContact() {
-        if (app.contacts().getCount() == 0) {
-            app.contacts().createContact(new ContactData("", "Ivanov", "Andrey",
+        if (app.hbm().getContactCount() == 0) {
+            app.hbm().createContact(new ContactData("", "Ivanov", "Andrey",
                     "Lenina, 15", "andrey121@gmail.com", "+7-123-456-7890", ""));
         }
-        var oldContacts = app.contacts().getList();
+        var oldContacts = app.hbm().getContactList();
         var rnd = new Random();
         var index = rnd.nextInt(oldContacts.size());
         var testData = new ContactData()
                 .withLastnameAndFirstname("new lastname", "new firstname")
-                .withAddress("")
-                .withEmail("")
-                .withPhoneHome("")
+                .withAddress("new address")
+                .withEmail("new@email")
+                .withPhoneHome("1234567")
                 .withPhoto("");
+        app.contacts().refreshPage();
         app.contacts().modifyContact(oldContacts.get(index), testData);
-        var newContacts = app.contacts().getList();
+        var newContacts = app.hbm().getContactList();
         var expectedList = new ArrayList<>(oldContacts);
         expectedList.set(index, testData.withId(oldContacts.get(index).id()));
         Comparator<ContactData> compareById = (o1, o2) -> {
@@ -34,6 +35,13 @@ public class ContactModificationTests extends TestBase {
         };
         newContacts.sort(compareById);
         expectedList.sort(compareById);
-        Assertions.assertEquals(newContacts, expectedList);
+        Assertions.assertEquals(expectedList, newContacts);
+
+        var newUiContacts = app.contacts().getList();
+        newUiContacts.sort(compareById);
+        // на основе expectedList создаём новый ожидаемый список контактов с пустыми значениями полей, которые не читаются из UI
+        var expectedUiList = new ArrayList<>(expectedList);
+        expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
+        Assertions.assertEquals(expectedUiList, newUiContacts);
     }
 }
