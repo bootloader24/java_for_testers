@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import ru.training.addressbook.model.GroupData;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -83,6 +84,35 @@ public class ContactCreationTests extends TestBase {
         // здесь потребуется дополнительная обработка этого поля в ожидаемом значении
         expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
         Assertions.assertEquals(expectedUiList, newUiContacts);
+    }
+
+    @ParameterizedTest
+    @MethodSource("singleRandomContactProvider")
+    void canCreateContactInGroup(ContactData contact) {
+        if (app.hbm().getGroupCount() == 0) {
+            app.hbm().createGroup(new GroupData("", "group name", "group header", "group footer"));
+        }
+        var group = app.hbm().getGroupList().get(0);
+        var oldRelated = app.hbm().getContactsInGroup(group);
+        app.contacts().createContact(contact, group);
+        var newRelated = app.hbm().getContactsInGroup(group);
+        Assertions.assertEquals(oldRelated.size() + 1, newRelated.size()); // простая проверка по количеству
+
+        Comparator<ContactData> compareById = (o1, o2) -> {
+            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
+        };
+        newRelated.sort(compareById);
+        var maxId = newRelated.get(newRelated.size() - 1).id();
+        var expectedList = new ArrayList<>(oldRelated);
+        expectedList.add(contact.withId(maxId).withPhoto(""));
+        expectedList.sort(compareById);
+        Assertions.assertEquals(expectedList, newRelated); // проверка со сравнением списков в БД
+
+        var newUiContactsInGroup = app.contacts().getList(group);
+        newUiContactsInGroup.sort(compareById);
+        var expectedUiList = new ArrayList<>(expectedList);
+        expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
+        Assertions.assertEquals(expectedUiList, newUiContactsInGroup); // проверка с чтением списка контактов из UI в выбранной группе
     }
 
     @ParameterizedTest

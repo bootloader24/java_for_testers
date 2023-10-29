@@ -18,7 +18,6 @@ public class ContactRemovalTests extends TestBase {
         var oldContacts = app.hbm().getContactList();
         var rnd = new Random();
         var index = rnd.nextInt(oldContacts.size());
-        app.contacts().refreshPage();
         app.contacts().removeContact(oldContacts.get(index));
         var newContacts = app.hbm().getContactList();
         var expectedList = new ArrayList<>(oldContacts);
@@ -32,7 +31,6 @@ public class ContactRemovalTests extends TestBase {
             app.hbm().createContact(new ContactData("", "Ivanov", "Andrey",
                     "Lenina, 15", "andrey121@gmail.com", "+7-123-456-7890", ""));
         }
-        app.contacts().refreshPage();
         app.contacts().removeAllContacts();
         Assertions.assertEquals(0, app.hbm().getContactCount());
     }

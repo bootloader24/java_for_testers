@@ -1,10 +1,16 @@
 package ru.training.addressbook.manager;
 
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.JavascriptExecutor;
+
 import ru.training.addressbook.model.ContactData;
 import org.openqa.selenium.By;
+import ru.training.addressbook.model.GroupData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class ContactHelper extends HelperBase {
 
@@ -21,7 +27,17 @@ public class ContactHelper extends HelperBase {
         openAddNewPage();
         fillContactForm(contact);
         submitContactCreation();
-        openHomePage();
+    }
+
+    public void createContact(ContactData contact, GroupData group) {
+        openAddNewPage();
+        fillContactForm(contact);
+        selectGroup(group);
+        submitContactCreation();
+    }
+
+    private void selectGroup(GroupData group) {
+        new Select(manager.driver.findElement(By.name("new_group"))).selectByValue(group.id());
     }
 
     public void removeContact(ContactData contact) {
@@ -46,17 +62,12 @@ public class ContactHelper extends HelperBase {
     }
 
     public void openHomePage() {
-        if (!manager.isElementPresent(By.name("searchstring"))) {
-            manager.driver.findElement(By.linkText("home")).click();
-        }
-    }
-
-    public void refreshPage() {
-        manager.driver.navigate().refresh();
+        manager.driver.findElement(By.linkText("home")).click();
     }
 
     private void submitContactCreation() {
         manager.driver.findElement(By.name("submit")).click();
+        manager.driver.findElement(By.cssSelector("div.msgbox"));
     }
 
     private void selectContact(ContactData contact) {
@@ -66,7 +77,6 @@ public class ContactHelper extends HelperBase {
     private void removeSelectedContact() {
         manager.driver.findElement(By.xpath("//input[@value=\'Delete\']")).click();
         manager.driver.switchTo().alert().accept();
-        // нужно подождать подтверждения удаления:
         manager.driver.findElement(By.cssSelector("div.msgbox"));
     }
 
@@ -85,6 +95,20 @@ public class ContactHelper extends HelperBase {
 
     public List<ContactData> getList() {
         openHomePage();
+        return getListFromSelectedGroup();
+    }
+
+    public List<ContactData> getList(GroupData groupdata) {
+        openHomePage();
+        try {
+            new Select(manager.driver.findElement(By.name("group"))).selectByValue(groupdata.id());
+            return getListFromSelectedGroup();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    private ArrayList<ContactData> getListFromSelectedGroup() {
         var contacts = new ArrayList<ContactData>();
         var tableRows = manager.driver.findElements(By.name("entry"));
         for (var tableRow : tableRows) {
@@ -105,14 +129,46 @@ public class ContactHelper extends HelperBase {
         initContactModification(contact);
         fillContactForm(modifiedContact);
         submitContactModification();
-        openHomePage();
     }
 
     private void submitContactModification() {
         click(By.name("update"));
+        manager.driver.findElement(By.cssSelector("div.msgbox"));
     }
 
     private void initContactModification(ContactData contact) {
-        manager.driver.findElement(By.xpath("//a[@href='edit.php?id=" + contact.id() + "']")).click();
+        /*При длинных значениях в полях контактов кнопка редактирования "уезжает" вправо за пределы видимой области,
+        из-за этого обычный метод click() не срабатывает, выкидывая исключение:
+        "Element is not clickable at point (x,y) because another element obscures it"
+        Для обхода этой проблемы нашлось решение в виде использования JavascriptExecutor
+        https://stackoverflow.com/questions/37879010/selenium-debugging-element-is-not-clickable-at-point-x-y */
+
+        WebElement element = manager.driver.findElement(By.xpath("//a[@href='edit.php?id=" + contact.id() + "']"));
+        JavascriptExecutor js = (JavascriptExecutor)manager.driver;
+        js.executeScript("arguments[0].click();", element);
+    }
+
+    public void addContactToGroup(ContactData contact, GroupData group) {
+        openHomePage();
+        selectContact(contact);
+        selectGroupForAddContact(group);
+    }
+
+    private void selectGroupForAddContact(GroupData group) {
+        new Select(manager.driver.findElement(By.name("to_group"))).selectByValue(group.id());
+        manager.driver.findElement(By.name("add")).click();
+        manager.driver.findElement(By.cssSelector("div.msgbox"));
+    }
+
+    public void removeContactFromGroup(ContactData contact, GroupData group) {
+        openHomePage();
+        selectGroupForShowContacts(group);
+        selectContact(contact);
+        manager.driver.findElement(By.name("remove")).click();
+        manager.driver.findElement(By.cssSelector("div.msgbox"));
+    }
+
+    private void selectGroupForShowContacts(GroupData group) {
+        new Select(manager.driver.findElement(By.name("group"))).selectByValue(group.id());
     }
 }
