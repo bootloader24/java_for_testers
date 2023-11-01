@@ -8,8 +8,8 @@ import ru.training.addressbook.manager.hbm.GroupRecord;
 import ru.training.addressbook.model.ContactData;
 import ru.training.addressbook.model.GroupData;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class HibernateHelper extends HelperBase {
@@ -76,6 +76,9 @@ public class HibernateHelper extends HelperBase {
                 record.address,
                 record.email,
                 record.phoneHome,
+                record.phoneMobile,
+                record.phoneWork,
+                record.phoneSecondary,
                 "");
     }
 
@@ -91,6 +94,9 @@ public class HibernateHelper extends HelperBase {
                 data.address(),
                 data.email(),
                 data.phoneHome(),
+                data.phoneMobile(),
+                data.phoneWork(),
+                data.phoneSecondary(),
                 data.photo());
     }
 

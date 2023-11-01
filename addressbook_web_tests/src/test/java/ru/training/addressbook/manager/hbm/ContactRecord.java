@@ -1,5 +1,6 @@
 package ru.training.addressbook.manager.hbm;
 
+import com.ctc.wstx.evt.WstxEventReader;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -24,8 +25,10 @@ public class ContactRecord {
     public String address;
     @Column(name = "home")
     public String phoneHome;
-    public String mobile = "";
-    public String work = "";
+    @Column(name = "mobile")
+    public String phoneMobile;
+    @Column(name = "work")
+    public String phoneWork;
     public String fax = "";
     public String email;
     public String email2 = "";
@@ -41,20 +44,24 @@ public class ContactRecord {
     public String amonth = "";
     public String ayear = "";
     public String address2 = "";
-    public String phone2 = "";
+    @Column(name = "phone2")
+    public String phoneSecondary;
     public String notes = "";
     public String photo;
 
     public ContactRecord() {
     }
 
-    public ContactRecord(int id, String lastName, String firstName, String address, String email, String phoneHome, String photo) {
+    public ContactRecord(int id, String lastName, String firstName, String address, String email, String phoneHome, String phoneMobile, String phoneWork, String phoneSecondary, String photo) {
         this.id = id;
         this.lastName = lastName;
         this.firstName = firstName;
         this.address = address;
         this.email = email;
         this.phoneHome = phoneHome;
+        this.phoneMobile = phoneMobile;
+        this.phoneWork = phoneWork;
+        this.phoneSecondary = phoneSecondary;
         this.photo = photo;
     }
 }

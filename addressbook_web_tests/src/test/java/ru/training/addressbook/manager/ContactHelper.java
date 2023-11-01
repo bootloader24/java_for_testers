@@ -8,9 +8,7 @@ import ru.training.addressbook.model.ContactData;
 import org.openqa.selenium.By;
 import ru.training.addressbook.model.GroupData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ContactHelper extends HelperBase {
@@ -170,5 +168,23 @@ public class ContactHelper extends HelperBase {
 
     private void selectGroupForShowContacts(GroupData group) {
         new Select(manager.driver.findElement(By.name("group"))).selectByValue(group.id());
+    }
+
+    public String getPhones(ContactData contact) {
+        openHomePage();
+        return manager.driver.findElement(By.xpath(
+                String.format("//input[@id='%s']/../../td[6]", contact.id()))).getText();
+    }
+
+    public Map<String, String> getPhones() {
+        openHomePage();
+        var result = new HashMap<String, String>();
+        List<WebElement> tableRows = manager.driver.findElements(By.name("entry"));
+        for (WebElement tableRow : tableRows) {
+            var id = tableRow.findElement(By.tagName("input")).getAttribute("id");
+            var phones = tableRow.findElements(By.tagName("td")).get(5).getText();
+            result.put(id, phones);
+        }
+        return result;
     }
 }
