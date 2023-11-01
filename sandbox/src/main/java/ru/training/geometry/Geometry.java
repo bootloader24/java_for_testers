@@ -4,17 +4,19 @@ import ru.training.geometry.figures.Rectangle;
 import ru.training.geometry.figures.Square;
 import ru.training.geometry.figures.Triangle;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 public class Geometry {
     public static void main(String[] args) {
-        Square.printSquareArea(new Square(5.0));
-        Square.printSquareArea(new Square(7.0));
-        Square.printSquareArea(new Square(9.0));
+        var squares = List.of(new Square(5.0), new Square(7.0), new Square(9.0));
+        squares.forEach(Square::printSquareArea);
 
-        Rectangle.printRectangleArea(new Rectangle(4.0, 5.0));
-        Rectangle.printRectangleArea(new Rectangle(12, 55));
+        var rectangles = List.of(new Rectangle(4.0, 5.0), new Rectangle(12.0, 55.0));
+        rectangles.forEach(Rectangle::printRectangleArea);
 
-        Triangle.printTriangleArea(new Triangle(2.0, 3.0, 4.0));
-        Triangle.printTriangleArea(new Triangle(2.0, 2.0, 1.0));
+        var triangles = List.of(new Triangle(2.0, 3.0, 4.0), new Triangle(2.0, 2.0, 1.0));
+        triangles.forEach(Triangle::printTriangleArea);
     }
 
 }
