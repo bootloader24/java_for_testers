@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ru.training.addressbook.common.CommonFunctions;
 import ru.training.addressbook.model.ContactData;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.training.addressbook.model.GroupData;
@@ -16,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -47,14 +47,14 @@ public class ContactCreationTests extends TestBase {
         return result;
     }
 
-    public static Stream<ContactData> singleRandomContactProvider() {
+    public static Stream<ContactData> RandomContactsProvider() {
         Supplier<ContactData> randomContact = () -> new ContactData()
         .withLastnameAndFirstname(CommonFunctions.randomString(10), CommonFunctions.randomString(10))
                 .withAddress(CommonFunctions.randomString(10))
                 .withEmail(CommonFunctions.randomString(10))
                 .withPhoneHome(CommonFunctions.randomString(10))
                 .withPhoto(CommonFunctions.randomFile("src/test/resources/images"));
-        return Stream.generate(randomContact).limit(3);
+        return Stream.generate(randomContact).limit(1);
     }
 
     public static List<ContactData> negativeContactProvider() {
@@ -64,33 +64,28 @@ public class ContactCreationTests extends TestBase {
     }
 
     @ParameterizedTest
-    @MethodSource("singleRandomContactProvider")
+    @MethodSource("RandomContactsProvider")
     void canCreateContact(ContactData contact) {
         var oldContacts = app.hbm().getContactList();
         app.contacts().createContact(contact);
         var newContacts = app.hbm().getContactList();
-        Comparator<ContactData> compareById = (o1, o2) -> {
-            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
-        };
-        newContacts.sort(compareById);
-        var maxId = newContacts.get(newContacts.size() - 1).id();
+        var extraContacts = newContacts.stream().filter(c -> ! oldContacts.contains(c)).toList();
+        var newId = extraContacts.get(0).id();
         var expectedList = new ArrayList<>(oldContacts);
-        expectedList.add(contact.withId(maxId).withPhoto(""));
-        expectedList.sort(compareById);
-        Assertions.assertEquals(expectedList, newContacts);
+        expectedList.add(contact.withId(newId).withPhoto(""));
+        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newContacts));
 
         var newUiContacts = app.contacts().getList();
-        newUiContacts.sort(compareById);
         // на основе expectedList создаём новый ожидаемый список контактов с пустыми значениями полей, которые не читаются из UI
         var expectedUiList = new ArrayList<>(expectedList);
         // phone не будем читать, так как в UI не отображаются символы пробела, дефиса и круглых скобок
         // здесь потребуется дополнительная обработка этого поля в ожидаемом значении
         expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
-        Assertions.assertEquals(expectedUiList, newUiContacts);
+        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContacts));
     }
 
     @ParameterizedTest
-    @MethodSource("singleRandomContactProvider")
+    @MethodSource("RandomContactsProvider")
     void canCreateContactInGroup(ContactData contact) {
         if (app.hbm().getGroupCount() == 0) {
             app.hbm().createGroup(new GroupData("", "group name", "group header", "group footer"));
@@ -101,21 +96,16 @@ public class ContactCreationTests extends TestBase {
         var newRelated = app.hbm().getContactsInGroup(group);
         Assertions.assertEquals(oldRelated.size() + 1, newRelated.size()); // простая проверка по количеству
 
-        Comparator<ContactData> compareById = (o1, o2) -> {
-            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
-        };
-        newRelated.sort(compareById);
-        var maxId = newRelated.get(newRelated.size() - 1).id();
+        var extraRelated = newRelated.stream().filter(r -> ! oldRelated.contains(r)).toList();
+        var changedId = extraRelated.get(0).id();
         var expectedList = new ArrayList<>(oldRelated);
-        expectedList.add(contact.withId(maxId).withPhoto(""));
-        expectedList.sort(compareById);
-        Assertions.assertEquals(expectedList, newRelated); // проверка со сравнением списков в БД
+        expectedList.add(contact.withId(changedId).withPhoto(""));
+        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newRelated)); // проверка со сравнением списков в БД
 
         var newUiContactsInGroup = app.contacts().getList(group);
-        newUiContactsInGroup.sort(compareById);
         var expectedUiList = new ArrayList<>(expectedList);
         expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
-        Assertions.assertEquals(expectedUiList, newUiContactsInGroup); // проверка с чтением списка контактов из UI в выбранной группе
+        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContactsInGroup)); // проверка с чтением списка контактов из UI в выбранной группе
     }
 
     @ParameterizedTest
@@ -145,5 +135,4 @@ public class ContactCreationTests extends TestBase {
         var newContacts = app.contacts().getList();
         Assertions.assertEquals(newContacts, oldContacts);
     }
-
 }

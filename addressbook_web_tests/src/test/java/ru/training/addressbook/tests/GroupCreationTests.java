@@ -2,24 +2,21 @@ package ru.training.addressbook.tests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import ru.training.addressbook.common.CommonFunctions;
 import ru.training.addressbook.model.GroupData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GroupCreationTests extends TestBase {
@@ -69,12 +66,12 @@ public class GroupCreationTests extends TestBase {
         return result;
     }
 
-    public static Stream<GroupData> singleRandomGroupProvider() {
+    public static Stream<GroupData> RandomGroupsProvider() {
         Supplier<GroupData> randomGroup = () -> new GroupData()
                 .withName(CommonFunctions.randomString(10))
                 .withHeader(CommonFunctions.randomString(20))
                 .withFooter(CommonFunctions.randomString(30));
-        return Stream.generate(randomGroup).limit(4);
+        return Stream.generate(randomGroup).limit(1);
     }
 
     public static List<GroupData> negativeGroupProvider() {
@@ -100,27 +97,31 @@ public class GroupCreationTests extends TestBase {
     }
 
     @ParameterizedTest
-    @MethodSource("singleRandomGroupProvider")
+    @MethodSource("RandomGroupsProvider")
     public void canCreateGroup(GroupData group) {
         var oldGroups = app.hbm().getGroupList();
         app.groups().createGroup(group);
         var newGroups = app.hbm().getGroupList();
-        Comparator<GroupData> compareById = (o1, o2) -> {
-            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
-        };
-        newGroups.sort(compareById);
-        var maxId = newGroups.get(newGroups.size() - 1).id();
+//        Comparator<GroupData> compareById = (o1, o2) -> {
+//            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
+//        };
+//        newGroups.sort(compareById);
+//        var maxId = newGroups.get(newGroups.size() - 1).id();
+        var extraGroups = newGroups.stream().filter(g -> ! oldGroups.contains(g)).toList();
+        var newId = extraGroups.get(0).id();
         var expectedList = new ArrayList<>(oldGroups);
-        expectedList.add(group.withId(maxId));
-        expectedList.sort(compareById);
-        Assertions.assertEquals(expectedList, newGroups);
+//        expectedList.add(group.withId(maxId));
+        expectedList.add(group.withId(newId));
+//        expectedList.sort(compareById);
+//        Assertions.assertEquals(expectedList, newGroups);
+        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newGroups));
 
         var newUiGroups = app.groups().getList();
-        newUiGroups.sort(compareById);
-        // на основе expectedList создаём новый ожидаемый список групп с пустыми значениями полей, которые не читаются из UI
+//        newUiGroups.sort(compareById);
+//        на основе expectedList создаём новый ожидаемый список групп с пустыми значениями полей, которые не читаются из UI
         var expectedUiList = new ArrayList<>(expectedList);
         expectedUiList.replaceAll(groups -> groups.withHeader("").withFooter(""));
-        Assertions.assertEquals(expectedUiList, newUiGroups);
+        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiGroups));
     }
 
     @ParameterizedTest

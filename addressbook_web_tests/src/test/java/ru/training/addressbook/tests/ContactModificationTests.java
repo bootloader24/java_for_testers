@@ -1,5 +1,6 @@
 package ru.training.addressbook.tests;
 
+import ru.training.addressbook.common.CommonFunctions;
 import ru.training.addressbook.model.ContactData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import ru.training.addressbook.model.GroupData;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.Set;
 
 public class ContactModificationTests extends TestBase {
 
@@ -21,28 +23,22 @@ public class ContactModificationTests extends TestBase {
         var rnd = new Random();
         var index = rnd.nextInt(oldContacts.size());
         var testData = new ContactData()
-                .withLastnameAndFirstname("new lastname", "new firstname")
-                .withAddress("new address")
-                .withEmail("new@email")
+                .withLastnameAndFirstname(CommonFunctions.randomString(8), CommonFunctions.randomString(8))
+                .withAddress(CommonFunctions.randomString(8))
+                .withEmail(CommonFunctions.randomString(5) + "@" + CommonFunctions.randomString(8))
                 .withPhoneHome("1234567")
                 .withPhoto("");
         app.contacts().modifyContact(oldContacts.get(index), testData);
         var newContacts = app.hbm().getContactList();
         var expectedList = new ArrayList<>(oldContacts);
         expectedList.set(index, testData.withId(oldContacts.get(index).id()));
-        Comparator<ContactData> compareById = (o1, o2) -> {
-            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
-        };
-        newContacts.sort(compareById);
-        expectedList.sort(compareById);
-        Assertions.assertEquals(expectedList, newContacts);
+        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newContacts));
 
         var newUiContacts = app.contacts().getList();
-        newUiContacts.sort(compareById);
         // на основе expectedList создаём новый ожидаемый список контактов с пустыми значениями полей, которые не читаются из UI
         var expectedUiList = new ArrayList<>(expectedList);
         expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
-        Assertions.assertEquals(expectedUiList, newUiContacts);
+        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContacts));
     }
 
     @Test
@@ -66,20 +62,14 @@ public class ContactModificationTests extends TestBase {
         var newRelated = app.hbm().getContactsInGroup(group);
         Assertions.assertEquals(oldRelated.size() + 1, newRelated.size()); // простая проверка по количеству
 
-        Comparator<ContactData> compareById = (o1, o2) -> {
-            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
-        };
-        newRelated.sort(compareById);
         var expectedList = new ArrayList<>(oldRelated);
         expectedList.add(contact);
-        expectedList.sort(compareById);
-        Assertions.assertEquals(expectedList, newRelated); // проверка со сравнением списков в БД
+        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newRelated)); // проверка со сравнением списков в БД
 
         var newUiContactsInGroup = app.contacts().getList(group);
-        newUiContactsInGroup.sort(compareById);
         var expectedUiList = new ArrayList<>(expectedList);
         expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
-        Assertions.assertEquals(expectedUiList, newUiContactsInGroup); // проверка с чтением списка контактов из UI в выбранной группе
+        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContactsInGroup)); // проверка с чтением списка контактов из UI в выбранной группе
     }
 
     @Test
@@ -97,28 +87,18 @@ public class ContactModificationTests extends TestBase {
         if (!app.hbm().isExistContactInGroup(group, contact)) {
             app.contacts().addContactToGroup(contact, group);
         }
-        ;
         var oldRelated = app.hbm().getContactsInGroup(group);
         app.contacts().removeContactFromGroup(contact, group);
         var newRelated = app.hbm().getContactsInGroup(group);
         Assertions.assertEquals(oldRelated.size() - 1, newRelated.size()); // простая проверка по количеству
 
-        Comparator<ContactData> compareById = (o1, o2) -> {
-            return Integer.compare(Integer.parseInt(o1.id()), Integer.parseInt(o2.id()));
-        };
         var expectedList = new ArrayList<>(oldRelated);
         expectedList.remove(0);
-        expectedList.sort(compareById);
-        if (!newRelated.isEmpty()) { // если новый список связанных контактов пуст, то проверка не имеет смысла
-            newRelated.sort(compareById);
-            Assertions.assertEquals(expectedList, newRelated); // проверка со сравнением списков в БД
-        }
+        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newRelated)); // проверка со сравнением списков в БД
 
         var newUiContactsInGroup = app.contacts().getList(group);
-        newUiContactsInGroup.sort(compareById);
         var expectedUiList = new ArrayList<>(expectedList);
         expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
-        Assertions.assertEquals(expectedUiList, newUiContactsInGroup); // проверка с чтением списка контактов из UI в выбранной группе
+        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContactsInGroup)); // проверка с чтением списка контактов из UI в выбранной группе
     }
-
 }
