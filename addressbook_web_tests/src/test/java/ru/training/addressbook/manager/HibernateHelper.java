@@ -9,7 +9,6 @@ import ru.training.addressbook.model.ContactData;
 import ru.training.addressbook.model.GroupData;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class HibernateHelper extends HelperBase {
@@ -75,6 +74,8 @@ public class HibernateHelper extends HelperBase {
                 record.firstName,
                 record.address,
                 record.email,
+                record.email2,
+                record.email3,
                 record.phoneHome,
                 record.phoneMobile,
                 record.phoneWork,
@@ -93,6 +94,8 @@ public class HibernateHelper extends HelperBase {
                 data.firstName(),
                 data.address(),
                 data.email(),
+                data.email2(),
+                data.email3(),
                 data.phoneHome(),
                 data.phoneMobile(),
                 data.phoneWork(),

@@ -187,4 +187,36 @@ public class ContactHelper extends HelperBase {
         }
         return result;
     }
+
+    public ArrayList<String> getDataFromHome(String id) {
+        openHomePage();
+        var result = new ArrayList<String>();
+        WebElement tableRow = manager.driver.findElement(By.xpath(String.format("//input[@id='%s']/../..", id)));
+        result.add(tableRow.findElements(By.tagName("td")).get(3).getText());
+        result.add(tableRow.findElements(By.tagName("td")).get(4).getText());
+        result.add(tableRow.findElements(By.tagName("td")).get(5).getText());
+        return result;
+    }
+
+    public ContactData getDataFromEditForm(ContactData contact) {
+        openHomePage();
+        initContactModification(contact);
+        var address = manager.driver.findElement(By.name("address")).getText();
+        var email = manager.driver.findElement(By.name("email")).getAttribute("value");
+        var email2 = manager.driver.findElement(By.name("email2")).getAttribute("value");
+        var email3 = manager.driver.findElement(By.name("email3")).getAttribute("value");
+        var phoneHome = manager.driver.findElement(By.name("home")).getAttribute("value");
+        var phoneMobile = manager.driver.findElement(By.name("mobile")).getAttribute("value");
+        var phoneWork = manager.driver.findElement(By.name("work")).getAttribute("value");
+        var phoneSecondary = manager.driver.findElement(By.name("phone2")).getAttribute("value");
+        return new ContactData()
+                .withAddress(address)
+                .withEmail(email)
+                .withEmail2(email2)
+                .withEmail3(email3)
+                .withPhoneHome(phoneHome)
+                .withPhoneMobile(phoneMobile)
+                .withPhoneWork(phoneWork)
+                .withPhoneSecondary(phoneSecondary);
+    }
 }
