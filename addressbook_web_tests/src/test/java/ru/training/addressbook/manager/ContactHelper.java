@@ -11,6 +11,7 @@ import ru.training.addressbook.model.GroupData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 public class ContactHelper extends HelperBase {
 
@@ -107,20 +108,20 @@ public class ContactHelper extends HelperBase {
         }
     }
 
-    private ArrayList<ContactData> getListFromSelectedGroup() {
-        var contacts = new ArrayList<ContactData>();
+    private List<ContactData> getListFromSelectedGroup() {
         var tableRows = manager.driver.findElements(By.name("entry"));
-        for (var tableRow : tableRows) {
-            var id = tableRow.findElement(By.cssSelector("td:nth-child(1).center>input")).getAttribute("value");
-            var lastName = tableRow.findElement(By.cssSelector("td:nth-child(2)")).getText();
-            var firstName = tableRow.findElement(By.cssSelector("td:nth-child(3)")).getText();
-            var address = tableRow.findElement(By.cssSelector("td:nth-child(4)")).getText();
-            var email = tableRow.findElement(By.cssSelector("td:nth-child(5)")).getText();
-            // поле phone не читаем, так как отображение отличается от хранимого значения, нужны дополнительные преобразования ожидания
-            // поле photo не читаем, так как оно не отображается в списке контактов
-            contacts.add(new ContactData().withId(id).withLastnameAndFirstname(lastName, firstName).withAddress(address).withEmail(email));
-        }
-        return contacts;
+        return tableRows.stream()
+                .map(tableRow -> {
+                    var id = tableRow.findElement(By.cssSelector("td:nth-child(1).center>input")).getAttribute("value");
+                    var lastName = tableRow.findElement(By.cssSelector("td:nth-child(2)")).getText();
+                    var firstName = tableRow.findElement(By.cssSelector("td:nth-child(3)")).getText();
+                    var address = tableRow.findElement(By.cssSelector("td:nth-child(4)")).getText();
+                    var email = tableRow.findElement(By.cssSelector("td:nth-child(5)")).getText();
+                    // поле phone не читаем, так как отображение отличается от хранимого значения, нужны дополнительные преобразования ожидания
+                    // поле photo не читаем, так как оно не отображается в списке контактов
+                    return new ContactData().withId(id).withLastnameAndFirstname(lastName, firstName).withAddress(address).withEmail(email);
+                })
+                .collect(Collectors.toList());
     }
 
     public void modifyContact(ContactData contact, ContactData modifiedContact) {
