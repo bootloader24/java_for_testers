@@ -5,18 +5,27 @@ import ru.training.geometry.figures.Square;
 import ru.training.geometry.figures.Triangle;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Random;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class Geometry {
     public static void main(String[] args) {
-        var squares = List.of(new Square(5.0), new Square(7.0), new Square(9.0));
-        squares.forEach(Square::printSquareArea);
+        Supplier<Square> randomSquare = () -> new Square(new Random().nextDouble(100));
+        var squares = Stream.generate(randomSquare).limit(5);
+        squares.peek(Square::printArea).forEach(Square::printPerimeter);
 
-        var rectangles = List.of(new Rectangle(4.0, 5.0), new Rectangle(12.0, 55.0));
-        rectangles.forEach(Rectangle::printRectangleArea);
+        Supplier<Rectangle> randomRectangle = () -> new Rectangle(
+                new Random().nextDouble(50),
+                new Random().nextDouble(50));
+        var rectangles = Stream.generate(randomRectangle).limit(5);
+        rectangles.peek(Rectangle::printArea).forEach(Rectangle::printPerimeter);
 
         var triangles = List.of(new Triangle(2.0, 3.0, 4.0), new Triangle(2.0, 2.0, 1.0));
-        triangles.forEach(Triangle::printTriangleArea);
+        triangles.forEach(triangle -> {
+            Triangle.printArea(triangle);
+            Triangle.printPerimeter(triangle);
+        });
     }
 
 }

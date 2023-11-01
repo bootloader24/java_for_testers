@@ -16,6 +16,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class ContactCreationTests extends TestBase {
 
@@ -45,13 +47,14 @@ public class ContactCreationTests extends TestBase {
         return result;
     }
 
-    public static List<ContactData> singleRandomContactProvider() throws IOException {
-        return List.of(new ContactData().withLastnameAndFirstname(CommonFunctions.randomString(10), CommonFunctions.randomString(10))
+    public static Stream<ContactData> singleRandomContactProvider() {
+        Supplier<ContactData> randomContact = () -> new ContactData()
+        .withLastnameAndFirstname(CommonFunctions.randomString(10), CommonFunctions.randomString(10))
                 .withAddress(CommonFunctions.randomString(10))
                 .withEmail(CommonFunctions.randomString(10))
                 .withPhoneHome(CommonFunctions.randomString(10))
-                .withPhoto(CommonFunctions.randomFile("src/test/resources/images")));
-
+                .withPhoto(CommonFunctions.randomFile("src/test/resources/images"));
+        return Stream.generate(randomContact).limit(3);
     }
 
     public static List<ContactData> negativeContactProvider() {

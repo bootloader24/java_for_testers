@@ -1,7 +1,5 @@
 package ru.training.geometry.figures;
 
-import java.util.Objects;
-
 public record Rectangle(double a, double b) {
 
     public Rectangle {
@@ -11,8 +9,13 @@ public record Rectangle(double a, double b) {
 
     }
 
-    public static void printRectangleArea(Rectangle r) {
+    public static void printArea(Rectangle r) {
         String text = String.format("Площадь прямоугольника со сторонами %f и %f = %f", r.a, r.b, r.area());
+        System.out.println(text);
+    }
+
+    public static void printPerimeter(Rectangle r) {
+        String text = String.format("Периметр прямоугольника со сторонами %f и %f = %f", r.a, r.b, r.perimeter());
         System.out.println(text);
     }
 
