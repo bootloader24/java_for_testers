@@ -26,7 +26,12 @@ public class ContactModificationTests extends TestBase {
                 .withLastnameAndFirstname(CommonFunctions.randomString(8), CommonFunctions.randomString(8))
                 .withAddress(CommonFunctions.randomString(8))
                 .withEmail(CommonFunctions.randomString(5) + "@" + CommonFunctions.randomString(8))
+                .withEmail2("")
+                .withEmail3("")
                 .withPhoneHome("1234567")
+                .withPhoneMobile("")
+                .withPhoneWork("")
+                .withPhoneSecondary("")
                 .withPhoto("");
         app.contacts().modifyContact(oldContacts.get(index), testData);
         var newContacts = app.hbm().getContactList();
