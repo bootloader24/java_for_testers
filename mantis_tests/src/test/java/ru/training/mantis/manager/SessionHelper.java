@@ -6,7 +6,6 @@ public class SessionHelper extends HelperBase {
 
     public SessionHelper(ApplicationManager manager) {
         super(manager);
-
     }
 
     public void login(String user, String password) {
