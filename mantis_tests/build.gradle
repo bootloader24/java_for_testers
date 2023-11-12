@@ -19,6 +19,7 @@ dependencies {
     testImplementation 'com.squareup.okhttp3:okhttp-urlconnection:4.11.0'
     testImplementation 'org.eclipse.angus:angus-mail:2.0.2'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+    testImplementation 'junit:junit:4.13.1'
     swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.34'
 
     testImplementation 'io.swagger:swagger-annotations:1.5.17'

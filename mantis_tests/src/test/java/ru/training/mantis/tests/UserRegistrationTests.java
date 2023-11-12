@@ -1,10 +1,13 @@
 package ru.training.mantis.tests;
 
 import io.swagger.client.model.UserAddResponse;
+import org.junit.After;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.training.mantis.common.CommonFunctions;
+import ru.training.mantis.model.DeveloperMailUser;
 import ru.training.mantis.model.UserData;
 
 import java.time.Duration;
@@ -67,4 +70,35 @@ public class UserRegistrationTests extends TestBase {
         app.mantisRestApi().deleteUser(addResponse.getUser().getId());
         app.jamesApi().deleteUser(email);
     }
+
+    @Test
+    void canRegisterUserViaApiDeveloperMail() {
+        var password = "password";
+        DeveloperMailUser user;
+        // создаём пользователя на почтовом сервере с помощью API:
+        user = app.developerMail().addUser();
+        var email = String.format("%s@developermail.com", user.name());
+
+
+//        // через REST API отправляем запрос на регистрацию
+//        // и чтобы после теста можно было удалить пользователя по его id, сохраняем результат в переменную:
+//        UserAddResponse addResponse = app.mantisRestApi()
+//                .createUser(new UserData().withUserName(username).withEmail(email));
+//        // ждём почту и забираем письмо:
+//        var message = app.mail().receive(email, password, Duration.ofSeconds(10)).get(0);
+//        // из письма извлекаем ссылку:
+//        var url = app.mail().extractUrl(message);
+//        // подчищаем папку INBOX на почтовом сервере:
+//        app.jamesApi().drainInbox(email);
+//        // через Selenium в браузере открываем ссылку и завершаем регистрацию:
+//        app.registration().completeRegistration(url, username, password);
+//        // проверяем http-запросами, что пользователь может залогиниться в mantis:
+//        app.http().login(username, password);
+//        Assertions.assertTrue(app.http().isLoggedIn());
+//
+//        // после теста удаляем пользователя из Mantis и его почтовый ящик из James через API
+//        app.mantisRestApi().deleteUser(addResponse.getUser().getId());
+        app.developerMail().deleteUser(user);
+    }
+
 }

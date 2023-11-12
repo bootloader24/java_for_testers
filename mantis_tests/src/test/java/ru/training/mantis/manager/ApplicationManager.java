@@ -20,6 +20,7 @@ public class ApplicationManager {
     private MailHelper mailHelper;
     private UserRegistrationHelper userRegistrationHelper;
     private MantisRestApiHelper mantisRestApiHelper;
+    private DeveloperMailHelper developerMailHelper;
 
     public void init(String browser, Properties properties) {
         this.browser = browser;
@@ -92,6 +93,13 @@ public class ApplicationManager {
             mantisRestApiHelper = new MantisRestApiHelper(this);
         }
         return mantisRestApiHelper;
+    }
+
+    public DeveloperMailHelper developerMail() {
+        if (developerMailHelper == null) {
+            developerMailHelper = new DeveloperMailHelper(this);
+        }
+        return developerMailHelper;
     }
     public String property(String name) {
         return properties.getProperty(name);
