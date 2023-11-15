@@ -4,6 +4,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,5 +24,13 @@ public class CommonFunctions {
         var rnd = new Random();
         var index = rnd.nextInt(fileNames.length);
         return Paths.get(dir, fileNames[index]).toString();
+    }
+
+    public static String extractUrl(String message) {
+        var pattern = Pattern.compile("http://\\S+");
+        var matcher = pattern.matcher(message);
+        if (matcher.find()) {
+            return message.substring(matcher.start(), matcher.end());
+        } else return null;
     }
 }

@@ -1,7 +1,6 @@
 package ru.training.mantis.tests;
 
 import io.swagger.client.model.UserAddResponse;
-import org.junit.After;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,9 +30,9 @@ public class UserRegistrationTests extends TestBase {
         // через Selenium в браузере заполняем форму и отправляем запрос на регистрацию:
         app.registration().initRegistration(username, email);
         // ждём почту и забираем письмо:
-        var message = app.mail().receive(email, password, Duration.ofSeconds(10)).get(0);
+        var message = app.mail().receive(email, password, Duration.ofSeconds(10)).get(0).content();
         // из письма извлекаем ссылку:
-        var url = app.mail().extractUrl(message);
+        var url = CommonFunctions.extractUrl(message);
         // подчищаем папку INBOX на почтовом сервере:
         app.mail().drain(email, password);
         // через Selenium в браузере открываем ссылку и завершаем регистрацию:
@@ -55,9 +54,9 @@ public class UserRegistrationTests extends TestBase {
         UserAddResponse addResponse = app.mantisRestApi()
                 .createUser(new UserData().withUserName(username).withEmail(email));
         // ждём почту и забираем письмо:
-        var message = app.mail().receive(email, password, Duration.ofSeconds(10)).get(0);
+        var message = app.mail().receive(email, password, Duration.ofSeconds(10)).get(0).content();
         // из письма извлекаем ссылку:
-        var url = app.mail().extractUrl(message);
+        var url = CommonFunctions.extractUrl(message);
         // подчищаем папку INBOX на почтовом сервере:
         app.jamesApi().drainInbox(email);
         // через Selenium в браузере открываем ссылку и завершаем регистрацию:
@@ -75,29 +74,27 @@ public class UserRegistrationTests extends TestBase {
     void canRegisterUserViaApiDeveloperMail() {
         var password = "password";
         DeveloperMailUser user;
-        // создаём пользователя на почтовом сервере с помощью API:
+        // создаём пользователя на почтовом сервере @developermail.com с помощью API:
         user = app.developerMail().addUser();
         var email = String.format("%s@developermail.com", user.name());
+        // через REST API отправляем запрос на регистрацию
+        // и чтобы после теста можно было удалить пользователя по его id, сохраняем результат в переменную:
+        UserAddResponse addResponse = app.mantisRestApi()
+                .createUser(new UserData().withUserName(user.name()).withEmail(email));
+        // ждём почту и забираем письмо:
+        var message = app.developerMail().receive(user, Duration.ofSeconds(60));
+        // из письма извлекаем ссылку:
+        var url = CommonFunctions.extractUrl(message);
+        // подчищаем папку INBOX на почтовом сервере:
+        app.jamesApi().drainInbox(email);
+        // через Selenium в браузере открываем ссылку и завершаем регистрацию:
+        app.registration().completeRegistration(url, user.name(), password);
+        // проверяем http-запросами, что пользователь может залогиниться в mantis:
+        app.http().login(user.name(), password);
+        Assertions.assertTrue(app.http().isLoggedIn());
 
-
-//        // через REST API отправляем запрос на регистрацию
-//        // и чтобы после теста можно было удалить пользователя по его id, сохраняем результат в переменную:
-//        UserAddResponse addResponse = app.mantisRestApi()
-//                .createUser(new UserData().withUserName(username).withEmail(email));
-//        // ждём почту и забираем письмо:
-//        var message = app.mail().receive(email, password, Duration.ofSeconds(10)).get(0);
-//        // из письма извлекаем ссылку:
-//        var url = app.mail().extractUrl(message);
-//        // подчищаем папку INBOX на почтовом сервере:
-//        app.jamesApi().drainInbox(email);
-//        // через Selenium в браузере открываем ссылку и завершаем регистрацию:
-//        app.registration().completeRegistration(url, username, password);
-//        // проверяем http-запросами, что пользователь может залогиниться в mantis:
-//        app.http().login(username, password);
-//        Assertions.assertTrue(app.http().isLoggedIn());
-//
-//        // после теста удаляем пользователя из Mantis и его почтовый ящик из James через API
-//        app.mantisRestApi().deleteUser(addResponse.getUser().getId());
+        // после теста удаляем пользователя из Mantis и его почтовый ящик из James через API
+        app.mantisRestApi().deleteUser(addResponse.getUser().getId());
         app.developerMail().deleteUser(user);
     }
 

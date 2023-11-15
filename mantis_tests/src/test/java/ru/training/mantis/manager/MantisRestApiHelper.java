@@ -9,7 +9,7 @@ import io.swagger.client.model.User;
 import io.swagger.client.model.UserAddResponse;
 import ru.training.mantis.model.UserData;
 
-public class MantisRestApiHelper extends HelperBase{
+public class MantisRestApiHelper extends HelperBase {
 
     public MantisRestApiHelper(ApplicationManager manager) {
         super(manager);
@@ -28,8 +28,7 @@ public class MantisRestApiHelper extends HelperBase{
             System.out.println("Response of user creation: \n" + response);
             return response;
         } catch (ApiException e) {
-            new RuntimeException(e);
-            return null;
+            throw new RuntimeException(e);
         }
     }
 
@@ -38,7 +37,7 @@ public class MantisRestApiHelper extends HelperBase{
         try {
             apiInstance.userDelete(id);
         } catch (ApiException e) {
-            new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 }
