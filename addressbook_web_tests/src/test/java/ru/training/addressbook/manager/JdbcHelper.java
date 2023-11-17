@@ -45,4 +45,17 @@ public class JdbcHelper extends HelperBase {
             throw new RuntimeException(e);
         }
     }
+
+    public void fixConsistency() {
+        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost/addressbook", "root", "");
+             var statement = conn.createStatement();)
+        {
+            int result = statement.executeUpdate(
+                    "DELETE ag FROM `address_in_groups` ag LEFT JOIN addressbook ab ON ab.id = ag.id WHERE ab.id IS NULL");
+            System.out.println("Number of fixed records: " + result);
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
