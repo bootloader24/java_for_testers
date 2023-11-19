@@ -2,6 +2,8 @@ package ru.training.addressbook.tests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.qameta.allure.Allure;
+import org.junit.jupiter.api.DisplayName;
 import ru.training.addressbook.common.CommonFunctions;
 import ru.training.addressbook.model.ContactData;
 import org.junit.jupiter.api.Assertions;
@@ -19,6 +21,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+@DisplayName("ContactCreationTests: Тесты создания контактов")
 public class ContactCreationTests extends TestBase {
 
     public static List<ContactData> contactProvider() throws IOException {
@@ -66,6 +69,7 @@ public class ContactCreationTests extends TestBase {
 
     @ParameterizedTest
     @MethodSource("RandomContactsProvider")
+    @DisplayName("canCreateContact: Тест создания контакта со случайными значениями полей")
     void canCreateContact(ContactData contact) {
         var oldContacts = app.hbm().getContactList();
         app.contacts().createContact(contact);
@@ -74,7 +78,9 @@ public class ContactCreationTests extends TestBase {
         var newId = extraContacts.get(0).id();
         var expectedList = new ArrayList<>(oldContacts);
         expectedList.add(contact.withId(newId).withPhoto(""));
-        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newContacts));
+        Allure.step("Проверка успешности появления контакта в БД", step -> {
+            Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newContacts));
+        });
 
         var newUiContacts = app.contacts().getList();
         // на основе expectedList создаём новый ожидаемый список контактов с пустыми значениями полей, которые не читаются из UI
@@ -82,35 +88,47 @@ public class ContactCreationTests extends TestBase {
         // phone не будем читать, так как в UI не отображаются символы пробела, дефиса и круглых скобок
         // здесь потребуется дополнительная обработка этого поля в ожидаемом значении
         expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
-        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContacts));
+        Allure.step("Проверка успешности появления контакта в UI", step -> {
+            Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContacts));
+        });
     }
 
     @ParameterizedTest
     @MethodSource("RandomContactsProvider")
+    @DisplayName("canCreateContactInGroup: Тест создания контакта в группе")
     void canCreateContactInGroup(ContactData contact) {
-        if (app.hbm().getGroupCount() == 0) {
-            app.hbm().createGroup(new GroupData("", "group name", "group header", "group footer"));
-        }
+        Allure.step("Проверка предусловия (должна существовать хотя бы одна группа)", step -> {
+            if (app.hbm().getGroupCount() == 0) {
+                app.hbm().createGroup(new GroupData("", "group name", "group header", "group footer"));
+            }
+        });
         var group = app.hbm().getGroupList().get(0);
         var oldRelated = app.hbm().getContactsInGroup(group);
         app.contacts().createContact(contact, group);
         var newRelated = app.hbm().getContactsInGroup(group);
-        Assertions.assertEquals(oldRelated.size() + 1, newRelated.size()); // простая проверка по количеству
+        Allure.step("Проверка успешности изменения количества контактов в группе в БД", step -> {
+            Assertions.assertEquals(oldRelated.size() + 1, newRelated.size());
+        });
 
         var extraRelated = newRelated.stream().filter(r -> ! oldRelated.contains(r)).toList();
         var changedId = extraRelated.get(0).id();
         var expectedList = new ArrayList<>(oldRelated);
         expectedList.add(contact.withId(changedId).withPhoto(""));
-        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newRelated)); // проверка со сравнением списков в БД
+        Allure.step("Проверка успешности появления контакта в группе в БД", step -> {
+            Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newRelated));
+        });
 
         var newUiContactsInGroup = app.contacts().getList(group);
         var expectedUiList = new ArrayList<>(expectedList);
         expectedUiList.replaceAll(contacts -> contacts.withPhoneHome("").withPhoto(""));
-        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContactsInGroup)); // проверка с чтением списка контактов из UI в выбранной группе
+        Allure.step("Проверка успешности появления контакта в группе в UI", step -> {
+            Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiContactsInGroup));
+        });
     }
 
     @ParameterizedTest
     @MethodSource("contactProvider")
+    @DisplayName("canCreateMultipleContacts: Тест создания множества контактов с данными из json-файла")
     public void canCreateMultipleContacts(ContactData contact) {
         var oldContacts = app.contacts().getList();
         app.contacts().createContact(contact);
@@ -125,15 +143,21 @@ public class ContactCreationTests extends TestBase {
                 .withPhoneHome("")
                 .withPhoto(""));
         expectedList.sort(compareById);
-        Assertions.assertEquals(expectedList, newContacts);
+        Allure.step("Проверка успешности появления контакта в UI", step -> {
+            Assertions.assertEquals(expectedList, newContacts);
+        });
     }
 
     @ParameterizedTest
     @MethodSource("negativeContactProvider")
+    @DisplayName("canNotCreateContact: Тест невозможности создания контакта с невалидными символами в поле lastname")
     public void canNotCreateContact(ContactData contact) {
         var oldContacts = app.contacts().getList();
         app.contacts().createContact(contact);
         var newContacts = app.contacts().getList();
-        Assertions.assertEquals(newContacts, oldContacts);
+
+        Allure.step("Проверка отсутствия появления контакта в UI", step -> {
+            Assertions.assertEquals(newContacts, oldContacts);
+        });
     }
 }

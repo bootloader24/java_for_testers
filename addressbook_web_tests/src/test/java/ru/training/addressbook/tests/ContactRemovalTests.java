@@ -1,5 +1,7 @@
 package ru.training.addressbook.tests;
 
+import io.qameta.allure.Allure;
+import org.junit.jupiter.api.DisplayName;
 import ru.training.addressbook.model.ContactData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -7,15 +9,19 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Random;
 
+@DisplayName("ContactRemovalTests: Тесты удаления контактов")
 public class ContactRemovalTests extends TestBase {
 
     @Test
+    @DisplayName("canRemoveContact: Тест удаления одного контакта")
     public void canRemoveContact() {
-        if (app.hbm().getContactCount() == 0) {
-            app.hbm().createContact(new ContactData("", "Ivanov", "Andrey",
-                    "Lenina, 15", "andrey121@gmail.com", "", "", "+7-123-456-7890",
-                    "", "", "", ""));
-        }
+        Allure.step("Проверка предусловия (должен существовать хотя бы один контакт)", step -> {
+            if (app.hbm().getContactCount() == 0) {
+                app.hbm().createContact(new ContactData("", "Ivanov", "Andrey",
+                        "Lenina, 15", "andrey121@gmail.com", "", "", "+7-123-456-7890",
+                        "", "", "", ""));
+            }
+        });
         var oldContacts = app.hbm().getContactList();
         var rnd = new Random();
         var index = rnd.nextInt(oldContacts.size());
@@ -23,18 +29,24 @@ public class ContactRemovalTests extends TestBase {
         var newContacts = app.hbm().getContactList();
         var expectedList = new ArrayList<>(oldContacts);
         expectedList.remove(index);
-        Assertions.assertEquals(expectedList, newContacts);
+        Allure.step("Проверка успешности удаления контакта в БД", step -> {
+            Assertions.assertEquals(expectedList, newContacts);
+        });
     }
 
     @Test
+    @DisplayName("canRemoveAllContactsAtOnce: Тест удаления сразу всех контактов")
     public void canRemoveAllContactsAtOnce() {
-        if (app.hbm().getContactCount() == 0) {
-            app.hbm().createContact(new ContactData("", "Ivanov", "Andrey",
-                    "Lenina, 15", "andrey121@gmail.com", "", "", "+7-123-456-7890",
-                    "", "", "", ""));
-        }
+        Allure.step("Проверка предусловия (должен существовать хотя бы один контакт)", step -> {
+            if (app.hbm().getContactCount() == 0) {
+                app.hbm().createContact(new ContactData("", "Ivanov", "Andrey",
+                        "Lenina, 15", "andrey121@gmail.com", "", "", "+7-123-456-7890",
+                        "", "", "", ""));
+            }
+        });
         app.contacts().removeAllContacts();
-        Assertions.assertEquals(0, app.hbm().getContactCount());
+        Allure.step("Проверка успешности удаления всех контактов в БД", step -> {
+            Assertions.assertEquals(0, app.hbm().getContactCount());
+        });
     }
-
 }

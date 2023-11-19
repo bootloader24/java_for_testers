@@ -1,5 +1,6 @@
 package ru.training.addressbook.manager;
 
+import io.qameta.allure.Step;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
@@ -29,7 +30,7 @@ public class HibernateHelper extends HelperBase {
 
     static List<GroupData> convertGroupList(List<GroupRecord> records) {
         return records.stream().map(HibernateHelper::convert).collect(Collectors.toList());
-      }
+    }
 
     private static GroupData convert(GroupRecord record) {
         return new GroupData("" + record.id, record.name, record.header, record.footer);
@@ -43,18 +44,21 @@ public class HibernateHelper extends HelperBase {
         return new GroupRecord(Integer.parseInt(id), data.name(), data.header(), data.footer());
     }
 
+    @Step("Получение списка групп через запрос в БД")
     public List<GroupData> getGroupList() {
         return convertGroupList(sessionFactory.fromSession(session -> {
             return session.createQuery("from GroupRecord", GroupRecord.class).list();
         }));
     }
 
+    @Step("Получение количества групп через запрос в БД")
     public long getGroupCount() {
         return sessionFactory.fromSession(session -> {
             return session.createQuery("select count (*) from GroupRecord", Long.class).getSingleResult();
         });
     }
 
+    @Step("Создание группы через запрос в БД")
     public void createGroup(GroupData groupData) {
         sessionFactory.inSession(session -> {
             session.getTransaction().begin();
@@ -63,8 +67,8 @@ public class HibernateHelper extends HelperBase {
         });
     }
 
-     static List<ContactData> convertContactList(List<ContactRecord> records) {
-         return records.stream().map(HibernateHelper::convert).collect(Collectors.toList());
+    static List<ContactData> convertContactList(List<ContactRecord> records) {
+        return records.stream().map(HibernateHelper::convert).collect(Collectors.toList());
     }
 
     private static ContactData convert(ContactRecord record) {
@@ -103,18 +107,21 @@ public class HibernateHelper extends HelperBase {
                 data.photo());
     }
 
+    @Step("Получение списка контактов через запрос в БД")
     public List<ContactData> getContactList() {
         return convertContactList(sessionFactory.fromSession(session -> {
             return session.createQuery("from ContactRecord", ContactRecord.class).list();
         }));
     }
 
+    @Step("Получение количества контактов через запрос в БД")
     public long getContactCount() {
         return sessionFactory.fromSession(session -> {
             return session.createQuery("select count (*) from ContactRecord", Long.class).getSingleResult();
         });
     }
 
+    @Step("Создание контакта через запрос в БД")
     public void createContact(ContactData contactData) {
         sessionFactory.inSession(session -> {
             session.getTransaction().begin();
@@ -123,12 +130,14 @@ public class HibernateHelper extends HelperBase {
         });
     }
 
+    @Step("Получение списка контактов в группе \"{group.name}\" через запрос в БД")
     public List<ContactData> getContactsInGroup(GroupData group) {
         return sessionFactory.fromSession(session -> {
             return convertContactList(session.get(GroupRecord.class, group.id()).contacts);
         });
     }
 
+    @Step("Проверка факта существования контакта в группе через запрос в БД")
     public boolean isExistContactInGroup(GroupData group, ContactData contact) {
         var contactsInGroup = getContactsInGroup(group);
         return contactsInGroup.contains(contact);

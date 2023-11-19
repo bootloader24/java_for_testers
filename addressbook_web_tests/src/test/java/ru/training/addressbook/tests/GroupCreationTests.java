@@ -2,6 +2,8 @@ package ru.training.addressbook.tests;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.qameta.allure.Allure;
+import org.junit.jupiter.api.DisplayName;
 import ru.training.addressbook.common.CommonFunctions;
 import ru.training.addressbook.model.GroupData;
 import org.junit.jupiter.api.Assertions;
@@ -19,6 +21,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@DisplayName("GroupCreationTests: Тесты создания групп")
 public class GroupCreationTests extends TestBase {
 
     public static List<GroupData> groupProvider() throws IOException {
@@ -82,6 +85,7 @@ public class GroupCreationTests extends TestBase {
 
     @ParameterizedTest
     @MethodSource("groupProvider")
+    @DisplayName("canCreateMultipleGroups: Тест создания множества групп с данными из json-файла")
     public void canCreateMultipleGroups(GroupData group) {
         var oldGroups = app.groups().getList();
         app.groups().createGroup(group);
@@ -93,11 +97,14 @@ public class GroupCreationTests extends TestBase {
         var expectedList = new ArrayList<>(oldGroups);
         expectedList.add(group.withId(newGroups.get(newGroups.size() - 1).id()).withHeader("").withFooter(""));
         expectedList.sort(compareById);
-        Assertions.assertEquals(expectedList, newGroups);
+        Allure.step("Проверка успешности появления группы в UI", step -> {
+            Assertions.assertEquals(expectedList, newGroups);
+        });
     }
 
     @ParameterizedTest
     @MethodSource("RandomGroupsProvider")
+    @DisplayName("canCreateGroup: Тест создания группы со случайными значениями полей")
     public void canCreateGroup(GroupData group) {
         var oldGroups = app.hbm().getGroupList();
         app.groups().createGroup(group);
@@ -114,22 +121,29 @@ public class GroupCreationTests extends TestBase {
         expectedList.add(group.withId(newId));
 //        expectedList.sort(compareById);
 //        Assertions.assertEquals(expectedList, newGroups);
-        Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newGroups));
+        Allure.step("Проверка успешности появления группы в БД", step -> {
+            Assertions.assertEquals(Set.copyOf(expectedList), Set.copyOf(newGroups));
+        });
 
         var newUiGroups = app.groups().getList();
 //        newUiGroups.sort(compareById);
 //        на основе expectedList создаём новый ожидаемый список групп с пустыми значениями полей, которые не читаются из UI
         var expectedUiList = new ArrayList<>(expectedList);
         expectedUiList.replaceAll(groups -> groups.withHeader("").withFooter(""));
-        Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiGroups));
+        Allure.step("Проверка успешности появления группы в UI", step -> {
+            Assertions.assertEquals(Set.copyOf(expectedUiList), Set.copyOf(newUiGroups));
+        });
     }
 
     @ParameterizedTest
     @MethodSource("negativeGroupProvider")
+    @DisplayName("canNotCreateGroup: Тест невозможности создания группы с невалидными символами в поле groupname")
     public void canNotCreateGroup(GroupData group) {
         var oldGroups = app.groups().getList();
         app.groups().createGroup(group);
         var newGroups = app.groups().getList();
-        Assertions.assertEquals(newGroups, oldGroups);
+        Allure.step("Проверка отсутствия появления группы в UI", step -> {
+            Assertions.assertEquals(newGroups, oldGroups);
+        });
     }
 }

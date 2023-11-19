@@ -1,5 +1,6 @@
 package ru.training.addressbook.manager;
 
+import io.qameta.allure.Step;
 import org.openqa.selenium.WebElement;
 import ru.training.addressbook.model.GroupData;
 import org.openqa.selenium.By;
@@ -21,6 +22,7 @@ public class GroupHelper extends HelperBase {
         }
     }
 
+    @Step("Создание группы в UI")
     public void createGroup(GroupData group) {
         openGroupsPage();
         initGroupCreation();
@@ -29,6 +31,7 @@ public class GroupHelper extends HelperBase {
         returnToGroupsPage();
     }
 
+    @Step("Удаление группы в UI")
     public void removeGroup(GroupData group) {
         openGroupsPage();
         selectGroup(group);
@@ -36,6 +39,7 @@ public class GroupHelper extends HelperBase {
         returnToGroupsPage();
     }
 
+    @Step("Редактирование группы в UI")
     public void modifyGroup(GroupData group, GroupData modifiedGroup) {
         openGroupsPage();
         selectGroup(group);
@@ -84,6 +88,7 @@ public class GroupHelper extends HelperBase {
         return manager.driver.findElements(By.name("selected[]")).size();
     }
 
+    @Step("Удаление всех групп в UI")
     public void removeAllGroups() {
         openGroupsPage();
         selectAllGroups();
@@ -96,6 +101,7 @@ public class GroupHelper extends HelperBase {
                 .forEach(WebElement::click);
     }
 
+    @Step("Получение списка групп из UI")
     public List<GroupData> getList() {
         openGroupsPage();
         var spans = manager.driver.findElements(By.cssSelector("span.group"));
