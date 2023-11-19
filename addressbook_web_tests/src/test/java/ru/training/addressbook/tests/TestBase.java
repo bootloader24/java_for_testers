@@ -17,7 +17,7 @@ public class TestBase {
             var properties = new Properties();
             properties.load(new FileReader(System.getProperty("target", "local.properties")));
             app = new ApplicationManager();
-            app.init(System.getProperty("browser", "chrome"), properties);
+            app.init(System.getProperty("browser", "firefox"), properties);
         }
         app.jdbc().fixConsistency();
     }
